@@ -1,0 +1,6 @@
+apiVersion: broker.amq.io/v1alpha1
+kind: ActiveMQArtemis
+metadata:
+  name: example-activemqartemis
+spec:
+  image: amq-broker-7/amq-broker-72-openshift:latest

@@ -1,0 +1,24 @@
+apiVersion: interconnectedcloud.github.io/v1alpha1
+kind: Interconnect
+metadata:
+  name: exposed-ports
+spec:
+  listeners:
+  - name: amqp
+    port: 5672
+  - name: amqps
+    port: 5671
+    sslProfile: default
+    expose: true
+  - name: console
+    port: 8672
+    http: true
+    expose: true
+  sslProfiles:
+  - name: inter-router-tls
+    requireClientCerts: true
+  interRouterListeners:
+  - name: inter-router
+    port: 55672
+    expose: true
+    sslProfile: inter-router-tls

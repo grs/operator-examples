@@ -1,0 +1,129 @@
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: client1-cert
+spec:
+  commonName: client1
+  issuerRef:
+    name: authenticated-ca
+  secretName: client1-cert
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: client1
+type: Opaque
+stringData:
+  connect.json: |-
+    {
+        "scheme": "amqps",
+        "host": "authenticated.myproject.svc.cluster.local",
+        "tls": {
+            "ca": "/etc/messaging/certs/ca.crt",
+            "cert": "/etc/messaging/certs/tls.crt",
+            "key": "/etc/messaging/certs/tls.key",
+            "verify": true
+        }
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: recv-amqps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: recv-amqps
+  template:
+    metadata:
+      labels:
+        application: recv-amqps
+    spec:
+      containers:
+      - image: quay.io/gordons/recv
+        imagePullPolicy: IfNotPresent
+        name: recv
+        env:
+        - name: ADDRESS
+          value: foo
+        volumeMounts:
+        - name: connect
+          mountPath: "/etc/messaging/"
+          readOnly: true
+        - name: ca-cert
+          mountPath: "/etc/messaging/certs/"
+          readOnly: true
+      volumes:
+      - name: connect
+        secret:
+          secretName: client1
+      - name: ca-cert
+        secret:
+          secretName: client1-cert
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: client2-cert
+spec:
+  commonName: client2
+  issuerRef:
+    name: authenticated-ca
+  secretName: client2-cert
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: client2
+type: Opaque
+stringData:
+  connect.json: |-
+    {
+        "scheme": "amqps",
+        "host": "authenticated.myproject.svc.cluster.local",
+        "tls": {
+            "ca": "/etc/messaging/certs/ca.crt",
+            "cert": "/etc/messaging/certs/tls.crt",
+            "key": "/etc/messaging/certs/tls.key",
+            "verify": true
+        }
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: send-amqps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: send-amqps
+  template:
+    metadata:
+      labels:
+        application: send-amqps
+    spec:
+      containers:
+      - image: quay.io/gordons/send
+        imagePullPolicy: IfNotPresent
+        name: send
+        env:
+        - name: ADDRESS
+          value: foo
+        volumeMounts:
+        - name: connect
+          mountPath: "/etc/messaging/"
+          readOnly: true
+        - name: ca-cert
+          mountPath: "/etc/messaging/certs/"
+          readOnly: true
+      volumes:
+      - name: connect
+        secret:
+          secretName: client2
+      - name: ca-cert
+        secret:
+          secretName: client2-cert
+---

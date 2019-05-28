@@ -1,0 +1,17 @@
+apiVersion: interconnectedcloud.github.io/v1alpha1
+kind: Interconnect
+metadata:
+  name: linkroute-example
+spec:
+  linkRoutes:
+  - prefix: foo
+    direction: in
+    connection: broker
+  - prefix: foo
+    direction: out
+    connection: broker
+  connectors:
+  - name: broker
+    host: broker
+    port: 5672
+    routeContainer: true

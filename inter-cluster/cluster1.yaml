@@ -1,0 +1,62 @@
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: cluster1-selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: cluster1-selfsigned-ca
+spec:
+  secretName: cluster1-selfsigned
+  commonName: "my-selfsigned-root-ca"
+  isCA: true
+  issuerRef:
+    name: cluster1-selfsigned
+    kind: Issuer
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: cluster1-ca-issuer
+spec:
+  ca:
+    secretName: cluster1-selfsigned
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: cluster1-inter-router-tls
+spec:
+  commonName: cluster1-inter-router-default.apps.grs-cluster1.devcluster.openshift.com
+  issuerRef:
+    name: cluster1-ca-issuer
+  secretName: cluster1-inter-router-tls
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: cluster1-inter-router-tls
+spec:
+  commonName: cluster1-inter-router-default.apps.grs-cluster1.devcluster.openshift.com
+  issuerRef:
+    name: cluster1-selfsigned
+  secretName: cluster1-inter-router-tls
+---
+apiVersion: interconnectedcloud.github.io/v1alpha1
+kind: Interconnect
+metadata:
+  name: cluster1
+spec:
+  sslProfiles:
+  - name: inter-router-tls
+    caCert: cluster1-inter-router-tls
+    credentials: cluster1-inter-router-tls
+  interRouterListeners:
+  - name: inter-router
+    port: 55672
+    expose: true
+    sslProfile: inter-router-tls

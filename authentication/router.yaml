@@ -1,0 +1,19 @@
+apiVersion: interconnectedcloud.github.io/v1alpha1
+kind: Interconnect
+metadata:
+  name: authenticated
+spec:
+  listeners:
+  - name: amqp
+    port: 5672
+    host: 127.0.0.1
+  - name: amqps
+    port: 5671
+    sslProfile: default
+    
+  - name: http
+    port: 8672
+    http: true
+  sslProfiles:
+  - name: default
+    requireClientCerts: true

@@ -1,0 +1,11 @@
+apiVersion: interconnectedcloud.github.io/v1alpha1
+kind: Interconnect
+metadata:
+  name: no-console
+spec:
+  listeners:
+  - name: amqp
+    port: 5672
+  - name: amqps
+    port: 5671
+    sslProfile: default
