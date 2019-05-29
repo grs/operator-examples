@@ -36,16 +36,6 @@ spec:
     name: cluster1-ca-issuer
   secretName: cluster1-inter-router-tls
 ---
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Certificate
-metadata:
-  name: cluster1-inter-router-tls
-spec:
-  commonName: cluster1-inter-router-default.apps.grs-cluster1.devcluster.openshift.com
-  issuerRef:
-    name: cluster1-selfsigned
-  secretName: cluster1-inter-router-tls
----
 apiVersion: interconnectedcloud.github.io/v1alpha1
 kind: Interconnect
 metadata:
