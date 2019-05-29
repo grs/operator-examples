@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: connect-config
+type: Opaque
+stringData:
+  connect.json: |-
+    {
+        "scheme": "amqp",
+        "host": "cluster2"
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: send-amqp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: send-amqp
+  template:
+    metadata:
+      labels:
+        application: send-amqp
+    spec:
+      containers:
+      - image: quay.io/gordons/send
+        imagePullPolicy: IfNotPresent
+        name: send
+        volumeMounts:
+        - name: connect
+          mountPath: "/etc/messaging/"
+          readOnly: true
+      volumes:
+      - name: connect
+        secret:
+          secretName: connect-config
+---

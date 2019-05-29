@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: connect-config
+type: Opaque
+stringData:
+  connect.json: |-
+    {
+        "scheme": "amqp",
+        "host": "cluster1"
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: recv-amqp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: recv-amqp
+  template:
+    metadata:
+      labels:
+        application: recv-amqp
+    spec:
+      containers:
+      - image: quay.io/gordons/recv
+        imagePullPolicy: IfNotPresent
+        name: recv
+        volumeMounts:
+        - name: connect
+          mountPath: "/etc/messaging/"
+          readOnly: true
+      volumes:
+      - name: connect
+        secret:
+          secretName: connect-config
+---
