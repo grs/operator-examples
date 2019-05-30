@@ -10,7 +10,8 @@ spec:
   - name: amqps
     port: 5671
     sslProfile: default
-    
+    authenticatePeer: true
+    saslMechanisms: EXTERNAL
   - name: http
     port: 8672
     http: true

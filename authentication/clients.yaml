@@ -2,11 +2,29 @@
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
+  name: dummy-cert
+spec:
+  commonName: dummy
+  issuerRef:
+    name: authenticated-ca
+  secretName: authenticated-dummy-cert
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Issuer
+metadata:
+  name: authenticated-default-ca
+spec:
+  ca:
+    secretName: authenticated-default-ca
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
   name: client1-cert
 spec:
   commonName: client1
   issuerRef:
-    name: authenticated-ca
+    name: authenticated-default-ca
   secretName: client1-cert
 ---
 apiVersion: v1
@@ -20,9 +38,9 @@ stringData:
         "scheme": "amqps",
         "host": "authenticated.myproject.svc.cluster.local",
         "tls": {
-            "ca": "/etc/messaging/certs/ca.crt",
-            "cert": "/etc/messaging/certs/tls.crt",
-            "key": "/etc/messaging/certs/tls.key",
+            "ca": "/etc/messaging/ca-cert/ca.crt",
+            "cert": "/etc/messaging/cert/tls.crt",
+            "key": "/etc/messaging/cert/tls.key",
             "verify": true
         }
     }
@@ -52,16 +70,22 @@ spec:
         - name: connect
           mountPath: "/etc/messaging/"
           readOnly: true
+        - name: client-cert
+          mountPath: "/etc/messaging/cert/"
+          readOnly: true
         - name: ca-cert
-          mountPath: "/etc/messaging/certs/"
+          mountPath: "/etc/messaging/ca-cert/"
           readOnly: true
       volumes:
       - name: connect
         secret:
           secretName: client1
-      - name: ca-cert
+      - name: client-cert
         secret:
           secretName: client1-cert
+      - name: ca-cert
+        secret:
+          secretName: authenticated-dummy-cert
 ---
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
@@ -70,7 +94,7 @@ metadata:
 spec:
   commonName: client2
   issuerRef:
-    name: authenticated-ca
+    name: authenticated-default-ca
   secretName: client2-cert
 ---
 apiVersion: v1
@@ -84,9 +108,9 @@ stringData:
         "scheme": "amqps",
         "host": "authenticated.myproject.svc.cluster.local",
         "tls": {
-            "ca": "/etc/messaging/certs/ca.crt",
-            "cert": "/etc/messaging/certs/tls.crt",
-            "key": "/etc/messaging/certs/tls.key",
+            "ca": "/etc/messaging/ca-cert/ca.crt",
+            "cert": "/etc/messaging/cert/tls.crt",
+            "key": "/etc/messaging/cert/tls.key",
             "verify": true
         }
     }
@@ -116,14 +140,20 @@ spec:
         - name: connect
           mountPath: "/etc/messaging/"
           readOnly: true
+        - name: client-cert
+          mountPath: "/etc/messaging/cert/"
+          readOnly: true
         - name: ca-cert
-          mountPath: "/etc/messaging/certs/"
+          mountPath: "/etc/messaging/ca-cert/"
           readOnly: true
       volumes:
       - name: connect
         secret:
           secretName: client2
-      - name: ca-cert
+      - name: client-cert
         secret:
           secretName: client2-cert
+      - name: ca-cert
+        secret:
+          secretName: authenticated-dummy-cert
 ---
