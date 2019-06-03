@@ -1,21 +1,3 @@
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Issuer
-metadata:
-  name: cluster2-ca-issuer
-spec:
-  ca:
-    secretName: inter-router-ca
----
-apiVersion: certmanager.k8s.io/v1alpha1
-kind: Certificate
-metadata:
-  name: cluster2-inter-router-tls
-spec:
-  commonName: cluster2-inter-router-default.apps.cluster2.devcluster.openshift.com
-  issuerRef:
-    name: cluster2-ca-issuer
-  secretName: cluster2-inter-router-tls
----
 apiVersion: interconnectedcloud.github.io/v1alpha1
 kind: Interconnect
 metadata:
@@ -23,8 +5,8 @@ metadata:
 spec:
   sslProfiles:
   - name: inter-router-tls
-    caCert: cluster2-inter-router-tls
     credentials: cluster2-inter-router-tls
+    caCert: cluster2-inter-router-tls
   interRouterConnectors:
   - host: cluster1-inter-router-default.apps.grs-cluster1.devcluster.openshift.com
     port: 443
