@@ -16,7 +16,7 @@ spec:
     expose: true
   sslProfiles:
   - name: inter-router-tls
-    requireClientCerts: true
+    mutualAuth: true
   interRouterListeners:
   - name: inter-router
     port: 55672
