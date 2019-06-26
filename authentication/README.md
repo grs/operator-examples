@@ -13,13 +13,15 @@ spec:
   - name: amqps
     port: 5671
     sslProfile: default
+    authenticatePeer: true
+    saslMechanisms: EXTERNAL
     expose: true
   - name: http
-    port: 8672
+    port: 8080
     http: true
   sslProfiles:
   - name: default
-    requireClientCerts: true
+    mutualAuth: true
 ```
 
 
